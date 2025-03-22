@@ -97,12 +97,12 @@ def attn_fwd_inner(
 
 @triton.jit
 def attn_fwd(
-    Q, # BATCH_SIZE, NUM_HEADS, SEQ_LEN, HEAD_DIM
-    K, # BATCH_SIZE, NUM_HEADS, SEQ_LEN, HEAD_DIM
-    V, # BATCH_SIZE, NUM_HEADS, SEQ_LEN, HEAD_DIM
+    Q,
+    K,
+    V,
     softmax_scale,
-    M, # BATCH_SIZE, NUM_HEADS, SEQ_LEN
-    O, # BATCH_SIZE, NUM_HEADS, SEQ_lEN, HEAD_DIM
+    M,
+    O,
     stride_Q_batch,
     stride_Q_head,
     stride_Q_seq,
@@ -148,6 +148,7 @@ def attn_fwd(
         + index_head.to(tl.int64) * stride_Q_head
     )
 
+    // pointer to Q_block 
     Q_block_ptr = tl.make_block_ptr(
         base=Q + qvk_offset,
         shape=(SEQ_LEN, HEAD_DIM),
@@ -157,6 +158,7 @@ def attn_fwd(
         order=(1, 0),
     )
 
+    // pointer to V_block
     V_block_ptr = tl.make_block_ptr(
         base=V + qvk_offset,
         shape=(SEQ_LEN, HEAD_DIM),
@@ -166,6 +168,7 @@ def attn_fwd(
         order=(1, 0),
     )
 
+    // pointer to K_block
     K_block_ptr = tl.make_block_ptr(
         base=K + qvk_offset,
         shape=(HEAD_DIM, SEQ_LEN),
@@ -209,7 +212,8 @@ def attn_fwd(
 
 
     if STAGE == 1 or STAGE == 3:
-        # This step runs for non-causal attention or for the blocks to the left of the diagonal in the causal attention
+        # This step runs for non-causal attention or for the blocks to the left 
+        # of the diagonal in the causal attention
         O_block, l_i, m_i = _attn_fwd_inner(
             O_block,
             l_i,
