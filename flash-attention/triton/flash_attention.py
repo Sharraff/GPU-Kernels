@@ -545,6 +545,16 @@ def attn_bwd_dk_dv(
 
 
 class TritonAttention(torch.autograd.Function):
+    """
+    this class implements the triton flash attention class
+
+    methods:
+         attn_fwd:
+         backward:
+         attn_bwd_dk_dv:
+         attn_bwd_preprocess:
+         attn_bwd_dq:
+    """
     @staticmethod
     def forward(ctx, Q, K, V, causal, softmax_scale):
         HEAD_DIM_Q, HEAD_DIM_K = Q.shape[-1], K.shape[-1]
