@@ -437,7 +437,8 @@ def attn_bwd_dk_dv(
     offset_batch_head_seq = (index_batch_head * SEQ_LEN).to(tl.int64)
 
     # Make sure the pointers are in the right place w.r.t batch and head
-    # the reason we don't access the blocks through make_block_ptr is because we need to use the range of offsets to apply the masking.
+    # the reason we don't access the blocks through make_block_ptr is 
+    # because we need to use the range of offsets to apply the masking.
     Q += offset_batch_head
     K += offset_batch_head
     V += offset_batch_head
@@ -472,11 +473,13 @@ def attn_bwd_dk_dv(
 
     offs_q = tl.arange(0, BLOCK_Q)
 
-     # We access the Q as a transposed array, so that's why we treat offs_q as a column vector ans offs_dim as a row vector
+    # We access the Q as a transposed array, so that's why we treat offs_q 
+    # as a column vector ans offs_dim as a row vector
     # This is equivalent to doing:
     # q_ptrs = Q + offs_q[:, None] * stride_seq + offs_dim[None, :] * stride_dim
     # qT_ptrs = tl.trans(q_ptrs)
-    # We point to the first BLOCK_Q rows of Q for both the qT and dO pointers, inside the for loop we will move forward by BLOCK_Q rows at each iteration.
+    # We point to the first BLOCK_Q rows of Q for both the qT and dO pointers, 
+    # inside the for loop we will move forward by BLOCK_Q rows at each iteration.
     qT_ptrs = Q + offs_q[None, :] * stride_seq + offs_dim[:, None] * stride_dim
     dO_ptrs = dO + offs_q[:, None] * stride_seq + offs_dim[None, :] * stride_dim
 
